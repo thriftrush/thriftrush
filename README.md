@@ -2,61 +2,58 @@
 Thriftrush menawarkan platform jual-beli barang bekas dan makanan sisa dalam masa edar bagi mahasiswa di Yogyakarta. Mahasiswa dapat menjual serta membeli barang bekas dan makanan sisa dalam masa edar dengan tujuan membantu mengurangi limbah makanan dan barang bekas sekaligus meningkatkan aksesibilitas produk bagi mahasiswa dengan harga terjangkau.
 # Fitur Utama
 # Penggunaan
-# Agrinesia App – User Flow Documentation
+# 📱 Panduan Penggunaan Aplikasi Jual/Beli Barang & Makanan
 
-## Penggunaan Aplikasi
-
-Aplikasi Agrinesia dirancang untuk memudahkan petani dan konsumen dalam menjual dan membeli produk hasil pertanian secara efisien dan transparan.
-
----
-
-### 1. Mendaftar dan Login
+## 🔐 Mendaftar dan Login
 
 1. Buka aplikasi atau halaman utama.
-2. Isi identitas pada formulir pendaftaran untuk membuat akun (jika belum memiliki).
-3. Login menggunakan akun yang sudah terdaftar.
+2. Isi identitas pada formulir pendaftaran (jika belum memiliki akun).
+3. Lakukan login menggunakan akun yang telah didaftarkan.
+
+## 🏠 Akses Halaman Utama
+
+- Setelah login berhasil, pengguna akan diarahkan ke halaman utama aplikasi.
+- Input lokasi pengguna untuk menyesuaikan data produk dan layanan yang ditampilkan.
+
+## 🔄 Memilih Aksi: Jual atau Beli
+
+Pengguna dapat memilih untuk menjual atau membeli barang/makanan.
 
 ---
 
-### 2. Halaman Utama
+### 🛍️ Jika Memilih **Jual**:
 
-1. Setelah login berhasil, pengguna diarahkan ke halaman utama aplikasi.
-2. Pengguna diminta untuk menginput lokasi untuk menyesuaikan layanan dan produk yang tersedia.
-
----
-
-### 3. Memilih Aksi: Jual atau Beli
-
-Pengguna dapat memilih salah satu aksi berikut:
+1. Masukkan data barang/makanan yang ingin dijual.
+2. Klik **"Post"** untuk mengunggah produk ke platform.
+3. Akses **menu QnA** untuk melihat atau menanggapi pertanyaan calon pembeli.
+4. Jawab pertanyaan yang masuk dari pembeli (jika ada).
+5. Lanjut ke **proses transaksi** jika ada pembelian.
+6. Setelah transaksi berhasil, lakukan **pengiriman barang** ke pembeli.
 
 ---
 
-### Jika Memilih **Jual**:
-
-1. Masukkan data barang/makanan yang akan dijual.
-2. Klik tombol **Post** untuk mengunggah produk ke platform.
-3. Masuk ke **Menu QnA** untuk melihat pertanyaan dari calon pembeli.
-4. Jawab pertanyaan yang masuk.
-5. Lanjutkan ke proses **Transaksi** saat pembeli melakukan pemesanan.
-6. Setelah transaksi dikonfirmasi, lakukan **Pengiriman** barang ke pembeli.
-
----
-
-### Jika Memilih **Beli**:
+### 🛒 Jika Memilih **Beli**:
 
 1. Cari barang/makanan yang diinginkan melalui fitur pencarian.
-2. Masuk ke **Menu QnA** jika ingin bertanya ke penjual.
-3. Klik **Ajukan Pertanyaan** untuk mengirim pertanyaan secara langsung.
-4. Setelah mendapatkan informasi, lanjutkan ke proses **Transaksi**.
-5. Lakukan **Pembayaran** sesuai instruksi yang tersedia.
-6. Tunggu proses **Pengiriman** dari penjual.
-7. Klik **Konfirmasi Pesanan** setelah barang diterima.
+2. Akses **menu QnA** untuk bertanya kepada penjual jika diperlukan.
+3. Klik **"Ajukan Pertanyaan"** untuk mengirim pertanyaan kepada penjual.
+4. Setelah mendapat informasi yang cukup, lanjutkan ke **proses transaksi**.
+5. Lakukan **pembayaran** sesuai instruksi sistem.
+6. Tunggu hingga penjual melakukan **pengiriman**.
+7. Setelah barang diterima, lakukan **konfirmasi pesanan**.
 
 ---
 
-### 4. Proses Selesai
+## ✅ Akhir Proses
 
-Setelah proses jual atau beli selesai, pengguna kembali ke halaman utama dan dapat memulai transaksi baru.
+Setelah transaksi selesai dan barang diterima, sistem akan menyelesaikan sesi pengguna. Aplikasi siap digunakan kembali untuk transaksi berikutnya.
+
+---
+
+
+
+
+
 
 
 
