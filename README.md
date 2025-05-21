@@ -1,6 +1,9 @@
 # Tentang Platform
 Thriftrush menawarkan platform jual-beli barang bekas dan makanan sisa dalam masa edar bagi mahasiswa di Yogyakarta. Mahasiswa dapat menjual serta membeli barang bekas dan makanan sisa dalam masa edar dengan tujuan membantu mengurangi limbah makanan dan barang bekas sekaligus meningkatkan aksesibilitas produk bagi mahasiswa dengan harga terjangkau.
 # Fitur Utama
+1. Fitur Jual → Mahasiswa dapat menjual barang bekasnya dengan mengisi berbagai input data untuk memberi informasi kepada buyer mengenai harga, kualitas, dll.
+2. Fitur Beli → Mahasiswa dapat membeli barang bekas yang tersedia di platform thriftrush
+
 # Penggunaan
 #  Panduan Penggunaan Aplikasi Jual/Beli Barang & Makanan
 
