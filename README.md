@@ -62,3 +62,5 @@ Setelah transaksi selesai dan barang diterima, sistem akan menyelesaikan sesi pe
 
 
 # Rencana Pengembangan Mendatang
+Pada awal pengembangan platform ini akan berfokus untuk menjangkau mahasiswa di wilayah Yogyakarta, sehingga kedepannya kami memiliki rencana untuk melakukan perluasan target pasar ke seluruh wilayah Pulau Jawa. 
+Kami juga memiliki rencana untuk menambahkan beberapa fitur tambahan untuk memudahkan pengguna dalam mengakses platform kami dan mengupdate tampilan layar pengguna agar pengguna lebih nyaman dalam menggunakan Thriftrush. Selain itu, kami berencana untuk melakukan peningkatan keamanan platform dan melakukan beberapa pemgujian tambahan. 
