@@ -14,7 +14,7 @@ qna <- data.frame(id_produk=numeric(), penanya=character(), pertanyaan=character
 transaksi <- data.frame(id_produk=numeric(), pembeli=character(), metode=character(), status=character(), stringsAsFactors=FALSE)
 
 ui <- fluidPage(
-  titlePanel("Triftrush - Platform Jual Beli Barang Bekas di Yogyakarta"),
+  titlePanel("Thriftrush - Platform Jual Beli Barang Bekas di Yogyakarta"),
   tags$head(
     # Font Inter
     tags$link(
