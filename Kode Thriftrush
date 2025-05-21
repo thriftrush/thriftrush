@@ -7,21 +7,10 @@ warna2 <- "#A5C59E"  # hijau muda
 warna3 <- "#FFFFFF"  # background putih
 warna4 <- "#E38C50"  # oranye lembut
 
-# Simulasi database
-users <- data.frame(nama=character(), email=character(), nohp=character(), lokasi=character(), stringsAsFactors=FALSE)
-produk <- data.frame(id=numeric(), penjual=character(), nama=character(), harga=numeric(), kualitas=character(), status=character(), stringsAsFactors=FALSE)
-qna <- data.frame(id_produk=numeric(), penanya=character(), pertanyaan=character(), jawaban=character(), stringsAsFactors=FALSE)
-transaksi <- data.frame(id_produk=numeric(), pembeli=character(), metode=character(), status=character(), stringsAsFactors=FALSE)
-
 ui <- fluidPage(
-  titlePanel("Thriftrush - Platform Jual Beli Barang Bekas di Yogyakarta"),
+  titlePanel("Triftrush - Platform Jual Beli Barang Bekas di Yogyakarta"),
   tags$head(
-    # Font Inter
-    tags$link(
-      href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap",
-      rel = "stylesheet"
-    ),
-    # CSS kustomisasi tampilan
+    tags$link(href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap", rel = "stylesheet"),
     tags$style(HTML(sprintf("
       body {
         background-color: %s;
@@ -49,18 +38,19 @@ ui <- fluidPage(
         color: %s;
         font-weight: 700;
       }
-      .leaf-icon {
-        font-size: 28px;
-        color: #4CAF50;
-        margin-right: 8px;
-        vertical-align: middle;
-      }
     ", warna3, warna1, warna2, warna1)))
   ),
   uiOutput("main_ui")
 )
 
 server <- function(input, output, session) {
+  database <- reactiveValues(
+    users = data.frame(nama=character(), email=character(), password=character(), nohp=character(), lokasi=character(), stringsAsFactors=FALSE),
+    produk = data.frame(id=numeric(), penjual=character(), nama=character(), harga=numeric(), kualitas=character(), status=character(), stringsAsFactors=FALSE),
+    qna = data.frame(id_produk=numeric(), penanya=character(), pertanyaan=character(), jawaban=character(), stringsAsFactors=FALSE),
+    transaksi = data.frame(id_produk=numeric(), pembeli=character(), metode=character(), status=character(), stringsAsFactors=FALSE)
+  )
+  
   user_logged <- reactiveVal(NULL)
   mode <- reactiveVal("login")
   produk_id_counter <- reactiveVal(1)
@@ -74,36 +64,35 @@ server <- function(input, output, session) {
   })
   
   loginUI <- function() {
-    fluidPage(
-      div(class="box",
-          h2("Login", style = paste("color:", warna1)),
-          textInput("login_email", "Email"),
-          actionButton("btn_login", "Masuk", class = "btn-custom"),
-          actionButton("to_register", "Belum punya akun?", class = "btn-custom")
-      )
+    div(class="box",
+        h2("Login"),
+        textInput("login_email", "Email"),
+        passwordInput("login_password", "Password"),
+        actionButton("btn_login", "Masuk", class = "btn-custom"),
+        actionButton("to_register", "Belum punya akun?", class = "btn-custom")
     )
   }
   
   registerUI <- function() {
-    fluidPage(
-      div(class="box",
-          h2("Daftar", style = paste("color:", warna1)),
-          textInput("reg_nama", "Nama"),
-          textInput("reg_email", "Email"),
-          textInput("reg_nohp", "No. Telepon"),
-          selectInput("reg_lokasi", "Lokasi", choices = c("Sleman", "Bantul", "Gunungkidul", "Kota Yogyakarta", "Kulonprogo")),
-          actionButton("btn_register", "Daftar", class = "btn-custom"),
-          actionButton("to_login", "Sudah punya akun?", class = "btn-custom")
-      )
+    div(class="box",
+        h2("Daftar"),
+        textInput("reg_nama", "Nama"),
+        textInput("reg_email", "Email"),
+        passwordInput("reg_password", "Password"),
+        textInput("reg_nohp", "No. Telepon"),
+        selectInput("reg_lokasi", "Lokasi", choices = c("Sleman", "Bantul", "Gunungkidul", "Kota Yogyakarta", "Kulonprogo")),
+        actionButton("btn_register", "Daftar", class = "btn-custom"),
+        actionButton("to_login", "Sudah punya akun?", class = "btn-custom")
     )
   }
   
   berandaUI <- function() {
     fluidPage(
       div(class="box",
-          h2(HTML('<span class="leaf-icon">&#127811;</span>Halo, ' %+% user_logged())),
+          h2(paste("Halo,", user_logged())),
           actionButton("btn_jual", "Jual Barang", class = "btn-custom"),
           actionButton("btn_beli", "Beli Barang", class = "btn-custom"),
+          actionButton("btn_qna_penjual", "QnA Saya", class = "btn-custom"),
           actionButton("btn_logout", "Logout", class = "btn-custom"),
           uiOutput("konten_beranda")
       )
@@ -114,13 +103,24 @@ server <- function(input, output, session) {
   observeEvent(input$to_login, { mode("login") })
   
   observeEvent(input$btn_register, {
-    users <<- rbind(users, data.frame(nama=input$reg_nama, email=input$reg_email, nohp=input$reg_nohp, lokasi=input$reg_lokasi, stringsAsFactors=FALSE))
+    database$users <- rbind(database$users, data.frame(
+      nama = input$reg_nama,
+      email = input$reg_email,
+      password = input$reg_password,
+      nohp = input$reg_nohp,
+      lokasi = input$reg_lokasi,
+      stringsAsFactors = FALSE
+    ))
     user_logged(input$reg_nama)
   })
   
   observeEvent(input$btn_login, {
-    found <- users[users$email == input$login_email, ]
-    if (nrow(found) > 0) user_logged(found$nama[1])
+    found <- database$users[database$users$email == input$login_email & database$users$password == input$login_password, ]
+    if (nrow(found) > 0) {
+      user_logged(found$nama[1])
+    } else {
+      showModal(modalDialog("Email atau password salah.", easyClose = TRUE))
+    }
   })
   
   observeEvent(input$btn_logout, {
@@ -133,6 +133,10 @@ server <- function(input, output, session) {
   
   observeEvent(input$btn_beli, {
     output$konten_beranda <- renderUI({ beliUI() })
+  })
+  
+  observeEvent(input$btn_qna_penjual, {
+    output$konten_beranda <- renderUI({ qnaPenjualUI() })
   })
   
   jualUI <- function() {
@@ -148,7 +152,7 @@ server <- function(input, output, session) {
   observeEvent(input$submit_jual, {
     new_id <- produk_id_counter()
     produk_id_counter(new_id + 1)
-    produk <<- rbind(produk, data.frame(
+    database$produk <- rbind(database$produk, data.frame(
       id = new_id,
       penjual = user_logged(),
       nama = input$nama_produk,
@@ -169,7 +173,7 @@ server <- function(input, output, session) {
   }
   
   observeEvent(input$search_produk, {
-    hasil <- produk[grepl(input$cari_produk, produk$nama, ignore.case=TRUE) & produk$status == "Dijual", ]
+    hasil <- database$produk[grepl(input$cari_produk, database$produk$nama, ignore.case=TRUE) & database$produk$status == "Dijual", ]
     output$hasil_produk <- renderTable({
       if (nrow(hasil) == 0) return(data.frame(Pesan = "Tidak ada produk ditemukan"))
       hasil[, c("id", "nama", "harga", "kualitas", "penjual")]
@@ -185,6 +189,23 @@ server <- function(input, output, session) {
     ))
   })
   
+  observeEvent(input$btn_bayar, {
+    idp <- as.numeric(input$id_beli)
+    if (idp %in% database$produk$id) {
+      database$transaksi <- rbind(database$transaksi, data.frame(
+        id_produk = idp,
+        pembeli = user_logged(),
+        metode = input$metode_bayar,
+        status = "Menunggu Pengiriman",
+        stringsAsFactors = FALSE
+      ))
+      database$produk[database$produk$id == idp, "status"] <- "Terjual"
+      showModal(modalDialog("Transaksi berhasil! Menunggu pengiriman.", easyClose = TRUE))
+    } else {
+      showModal(modalDialog("ID produk tidak ditemukan.", easyClose = TRUE))
+    }
+  })
+  
   observeEvent(input$btn_qna, {
     showModal(modalDialog(
       title = "QnA Produk",
@@ -195,7 +216,7 @@ server <- function(input, output, session) {
   
   output$qna_ui <- renderUI({
     produk_id <- as.numeric(input$id_beli)
-    qna_produk <- qna[qna$id_produk == produk_id, ]
+    qna_produk <- database$qna[database$qna$id_produk == produk_id, ]
     tagList(
       lapply(1:nrow(qna_produk), function(i) {
         div(
@@ -210,32 +231,50 @@ server <- function(input, output, session) {
   
   observeEvent(input$submit_pertanyaan, {
     produk_id <- as.numeric(input$id_beli)
-    qna <<- rbind(qna, data.frame(
+    database$qna <- rbind(database$qna, data.frame(
       id_produk = produk_id,
       penanya = user_logged(),
       pertanyaan = input$pertanyaan_baru,
       jawaban = "",
       stringsAsFactors = FALSE
     ))
-    showModal(modalDialog("Pertanyaan berhasil dikirim! Penjual akan segera menjawab.", easyClose=TRUE))
+    showModal(modalDialog("Pertanyaan berhasil dikirim!", easyClose=TRUE))
   })
   
-  observeEvent(input$btn_bayar, {
-    idp <- as.numeric(input$id_beli)
-    if (idp %in% produk$id) {
-      transaksi <<- rbind(transaksi, data.frame(
-        id_produk = idp,
-        pembeli = user_logged(),
-        metode = input$metode_bayar,
-        status = "Menunggu Pengiriman",
-        stringsAsFactors = FALSE
-      ))
-      produk[produk$id == idp, "status"] <<- "Terjual"
-      showModal(modalDialog("Transaksi berhasil! Menunggu pengiriman.", easyClose = TRUE))
-    } else {
-      showModal(modalDialog("ID produk tidak ditemukan.", easyClose = TRUE))
-    }
+  qnaPenjualUI <- function() {
+    produk_saya <- database$produk[database$produk$penjual == user_logged(), ]
+    qna_saya <- database$qna[database$qna$id_produk %in% produk_saya$id, ]
+    
+    if (nrow(qna_saya) == 0) return(h4("Belum ada pertanyaan dari pembeli."))
+    
+    tagList(
+      h3("Pertanyaan untuk Produk Anda"),
+      lapply(1:nrow(qna_saya), function(i) {
+        div(
+          h4(paste("Produk ID:", qna_saya$id_produk[i])),
+          p(paste("Pertanyaan dari", qna_saya$penanya[i], ":", qna_saya$pertanyaan[i])),
+          textInput(paste0("jawab_", i), "Jawaban:", value = qna_saya$jawaban[i]),
+          actionButton(paste0("kirim_jawab_", i), "Kirim Jawaban", class = "btn-custom"),
+          tags$hr()
+        )
+      })
+    )
+  }
+  
+  observe({
+    req(user_logged())
+    qna_saya <- database$qna
+    produk_saya <- database$produk[database$produk$penjual == user_logged(), ]
+    idx_list <- which(qna_saya$id_produk %in% produk_saya$id)
+    
+    lapply(idx_list, function(i) {
+      observeEvent(input[[paste0("kirim_jawab_", i)]], {
+        database$qna[i, "jawaban"] <- input[[paste0("jawab_", i)]]
+        showModal(modalDialog("Jawaban dikirim!", easyClose = TRUE))
+      }, ignoreInit = TRUE)
+    })
   })
 }
 
 shinyApp(ui = ui, server = server)
+
