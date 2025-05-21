@@ -2,26 +2,26 @@
 Thriftrush menawarkan platform jual-beli barang bekas dan makanan sisa dalam masa edar bagi mahasiswa di Yogyakarta. Mahasiswa dapat menjual serta membeli barang bekas dan makanan sisa dalam masa edar dengan tujuan membantu mengurangi limbah makanan dan barang bekas sekaligus meningkatkan aksesibilitas produk bagi mahasiswa dengan harga terjangkau.
 # Fitur Utama
 # Penggunaan
-# 📱 Panduan Penggunaan Aplikasi Jual/Beli Barang & Makanan
+#  Panduan Penggunaan Aplikasi Jual/Beli Barang & Makanan
 
-## 🔐 Mendaftar dan Login
+## Mendaftar dan Login
 
 1. Buka aplikasi atau halaman utama.
 2. Isi identitas pada formulir pendaftaran (jika belum memiliki akun).
 3. Lakukan login menggunakan akun yang telah didaftarkan.
 
-## 🏠 Akses Halaman Utama
+##  Akses Halaman Utama
 
 - Setelah login berhasil, pengguna akan diarahkan ke halaman utama aplikasi.
 - Input lokasi pengguna untuk menyesuaikan data produk dan layanan yang ditampilkan.
 
-## 🔄 Memilih Aksi: Jual atau Beli
+##  Memilih Aksi: Jual atau Beli
 
 Pengguna dapat memilih untuk menjual atau membeli barang/makanan.
 
 ---
 
-### 🛍️ Jika Memilih **Jual**:
+## Jika Memilih **Jual**:
 
 1. Masukkan data barang/makanan yang ingin dijual.
 2. Klik **"Post"** untuk mengunggah produk ke platform.
@@ -32,7 +32,7 @@ Pengguna dapat memilih untuk menjual atau membeli barang/makanan.
 
 ---
 
-### 🛒 Jika Memilih **Beli**:
+### Jika Memilih **Beli**:
 
 1. Cari barang/makanan yang diinginkan melalui fitur pencarian.
 2. Akses **menu QnA** untuk bertanya kepada penjual jika diperlukan.
@@ -44,7 +44,7 @@ Pengguna dapat memilih untuk menjual atau membeli barang/makanan.
 
 ---
 
-## ✅ Akhir Proses
+##  Akhir Proses
 
 Setelah transaksi selesai dan barang diterima, sistem akan menyelesaikan sesi pengguna. Aplikasi siap digunakan kembali untuk transaksi berikutnya.
 
