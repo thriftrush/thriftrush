@@ -1,117 +1,932 @@
 library(shiny)
+library(shinydashboard)
+library(DT)
+library(ggplot2)
 library(shinyWidgets)
+library(base64enc)
 
 # Warna UI bertema sustainability
-warna1 <- "#3E6532"
-warna2 <- "#A5C59E"
-warna3 <- "#FFFFFF"
-warna4 <- "#E38C50"
+warna1 <- "#3E6532"  # Hijau tua
+warna2 <- "#A5C59E"  # Hijau muda
+warna3 <- "#FFFFFF"  # Putih
+warna4 <- "#E38C50"  # Oranye
 
-# Simulasi database dalam reactiveValues
-db <- reactiveValues(
-  users = data.frame(nama=character(), email=character(), nohp=character(), lokasi=character(), stringsAsFactors=FALSE),
-  produk = data.frame(id=numeric(), penjual=character(), nama=character(), harga=numeric(), kualitas=character(), status=character(), stringsAsFactors=FALSE),
-  qna = data.frame(id_produk=numeric(), penanya=character(), pertanyaan=character(), jawaban=character(), stringsAsFactors=FALSE),
-  transaksi = data.frame(id_produk=numeric(), pembeli=character(), metode=character(), status=character(), stringsAsFactors=FALSE)
-)
-
-ui <- fluidPage(
-  titlePanel("Triftrush - Platform Jual Beli Barang Bekas di Yogyakarta"),
-  tags$head(
-    tags$link(href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap", rel = "stylesheet"),
-    tags$style(HTML(sprintf("
-      body {
-        background-color: %s;
-        font-family: 'Inter', sans-serif;
-        color: #333333;
-        padding: 20px;
-      }
-      .btn-custom {
-        background-color: %s;
-        color: white;
-        margin: 5px;
-        border-radius: 8px;
-        font-weight: 600;
-      }
-      .box {
-        background-color: %s;
-        padding: 20px;
-        border-left: 6px solid #3E6532;
-        border-radius: 10px;
-        margin: 20px auto;
-        max-width: 600px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      }
-      h2, h3, h4 {
-        color: %s;
-        font-weight: 700;
-      }
-      .leaf-icon {
-        font-size: 28px;
-        color: #4CAF50;
-        margin-right: 8px;
-        vertical-align: middle;
-      }
-    ", warna3, warna1, warna2, warna1)))
+# Data contoh produk bekas
+produk_bekas <- data.frame(
+  ID = 1:10,
+  Gambar = c(
+    "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+    "https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+    "https://images.unsplash.com/photo-1676302447092-14a103558511?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Ym9vayUyMG1hdGh8ZW58MHx8MHx8fDA%3D",
+    "https://images.unsplash.com/photo-1708447135262-850979354fcf?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fGxhcHRvcCUyMGJhZ3xlbnwwfHwwfHx8MA%3D%3D",
+    "https://images.unsplash.com/photo-1571907729639-ffd97f5c7298?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZGlnaXRhbCUyMGNhbWVyYXxlbnwwfHwwfHx8MA%3D%3D",
+    "https://images.unsplash.com/photo-1615589484252-c70def71bb4f?q=80&w=3086&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+    "https://images.unsplash.com/photo-1486887396153-fa416526c108?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1718815416565-c65944a5ec14?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c21hbGwlMjBmYW58ZW58MHx8MHx8fDA%3D",
+    "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   ),
-  uiOutput("main_ui")
+  Nama = c(
+    "Baju Kaos Putih", 
+    "Jaket",
+    "Buku Persiapan UM UGM",
+    "Tas Laptop Bekas",
+    "Kamera Digital Bekas",
+    "Makanan Kaleng",
+    "Jaket Waterproof",
+    "Roti Tawar",
+    "Kipas Angin",
+    "Kursi Kantor Bekas"
+  ),
+  Harga = c(150000, 250000, 50000, 120000, 150000, 50000, 1200000, 150000, 20000, 350000),
+  Deskripsi = c(
+    "Baju kaos putih, bahan polyester",
+    "Jaket perempuan ukuran L, bahan denim",
+    "Buku UM UGM",
+    "Tas laptop 15 inch, ada sedikit lecet",
+    "Kamera digital 16MP, termasuk memory card 32GB",
+    "Makanan kaleng kadaluarsa 2 bulan lagi",
+    "Bahan plastik",
+    "Roti tawae kadaluarsa 1 minggu lagi",
+    "Kipas angin pink",
+    "Kursi kantor ergonomis, bahan mesh"
+  ),
+  Penjual = c("Budi", "Ani", "Citra", "Doni", "Eka", "Fani", "Gita", "Hadi", "Indra", "Joni"),
+  Lokasi = c("Sleman", "Bantul", "Kota Yogya", "Sleman", "Gunungkidul", "Kulonprogo", "Bantul", "Kota Yogya", "Sleman", "Gunungkidul"),
+  Kondisi = c("Bekas - Baik", "Bekas - Baik", "Bekas - Baik", "Bekas - Cukup", "Bekas - Baik", "Baru", "Bekas - Baik", "Bekas - Cukup", "Bekas - Baik", "Bekas - Cukup"),
+  Status = rep("Dijual", 10),
+  stringsAsFactors = FALSE
 )
 
+# UI definition
+ui <- dashboardPage(
+  dashboardHeader(
+    title = tags$img(src = "https://drive.google.com/thumbnail?id=16_fBsqMzSVUN5tH3Hv5bjig6MWR6-zB8", height = "38px",
+                     style = "margin-right: 12px;")
+  ),
+  dashboardSidebar(
+    width = 250,
+    sidebarMenu(
+      id = "sidebar",
+      menuItem("Beranda", tabName = "beranda", icon = icon("home")),
+      menuItem("Jual Barang", tabName = "jual", icon = icon("plus-circle")),
+      menuItem("Produk Saya", tabName = "produk_saya", icon = icon("list")),
+      menuItem("Profil Pengguna", tabName = "profil", icon = icon("user")),
+      menuItem("Login/Register", tabName = "auth", icon = icon("sign-in-alt"))
+    ),
+    tags$style(HTML(sprintf("
+      .sidebar {
+        background-color: %s !important;
+      }
+      .sidebar-menu li a {
+        color: %s !important;
+      }
+      .sidebar-menu li.active a {
+        color: %s !important;
+        font-weight: bold;
+        border-left: 3px solid %s;
+      }
+    ", warna1, warna3, warna4, warna4)))
+  ),
+  dashboardBody(
+    tags$head(
+      tags$link(href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap", rel = "stylesheet"),
+      tags$style(HTML(sprintf("
+        body {
+          font-family: 'Inter', sans-serif;
+        }
+        .btn-custom {
+          background-color: %s;
+          color: white;
+          margin: 5px;
+          border-radius: 8px;
+          font-weight: 600;
+        }
+        .btn-danger-custom {
+          background-color: #dc3545;
+          color: white;
+          margin: 5px;
+          border-radius: 8px;
+          font-weight: 600;
+        }
+        .box-custom {
+          background-color: %s;
+          padding: 20px;
+          border-left: 6px solid %s;
+          border-radius: 10px;
+          margin: 10px 0;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .leaf-icon {
+          font-size: 28px;
+          color: #4CAF50;
+          margin-right: 8px;
+          vertical-align: middle;
+        }
+        .skin-blue .main-header .navbar {
+          background-color: %s;
+        }
+        .skin-blue .main-header .logo {
+          background-color: %s;
+          color: white;
+          font-weight: bold;
+        }
+        .product-card {
+          background-color: %s;
+          border-radius: 10px;
+          padding: 15px;
+          margin-bottom: 20px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .product-img {
+          width: 100%%;
+          height: 200px;
+          object-fit: cover;
+          border-radius: 8px;
+        }
+        .chat-box {
+          height: 300px;
+          overflow-y: scroll;
+          border: 1px solid #ddd;
+          padding: 10px;
+          margin-bottom: 10px;
+          border-radius: 8px;
+          background-color: %s;
+        }
+        .chat-message {
+          padding: 8px 12px;
+          border-radius: 18px;
+          margin-bottom: 8px;
+          max-width: 70%%;
+        }
+        .sender-message {
+          background-color: %s;
+          color: white;
+          margin-left: auto;
+          margin-right: 0;
+        }
+        .receiver-message {
+          background-color: %s;
+          color: #333;
+          margin-right: auto;
+          margin-left: 0;
+        }
+        .form-section {
+          background-color: white;
+          padding: 20px;
+          border-radius: 10px;
+          margin-bottom: 20px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .preview-img {
+          max-width: 200px;
+          max-height: 200px;
+          border-radius: 8px;
+          margin-top: 10px;
+        }
+        .alert-success {
+          background-color: #d4edda;
+          border-color: #c3e6cb;
+          color: #155724;
+          padding: 10px;
+          border-radius: 5px;
+          margin: 10px 0;
+        }
+        .alert-error {
+          background-color: #f8d7da;
+          border-color: #f5c6cb;
+          color: #721c24;
+          padding: 10px;
+          border-radius: 5px;
+          margin: 10px 0;
+        }
+        .search-container {
+          background-color: %s;
+          padding: 20px;
+          border-radius: 10px;
+          margin-bottom: 20px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .search-input {
+          width: 100%%;
+          padding: 12px 15px;
+          border: 2px solid %s;
+          border-radius: 25px;
+          font-size: 16px;
+          outline: none;
+        }
+        .search-input:focus {
+          border-color: %s;
+          box-shadow: 0 0 0 0.2rem rgba(62, 101, 50, 0.25);
+        }
+        .filter-container {
+          margin-top: 15px;
+        }
+        .filter-item {
+          display: inline-block;
+          margin-right: 15px;
+          margin-bottom: 10px;
+        }
+      ", warna1, warna2, warna1, warna1, warna1, warna2, warna2, warna1, warna2, warna2, warna2, warna1)))
+    ),
+    tabItems(
+      # Beranda tab with search functionality
+      tabItem(tabName = "beranda",
+              # Search Section
+              div(class = "search-container",
+                  h2(HTML(paste0('<span class="leaf-icon">&#127811;</span>Cari Produk Bekas'))),
+                  p("Temukan barang bekas berkualitas dengan harga terjangkau!"),
+                  br(),
+                  textInput("search_query", "", 
+                            placeholder = "Cari nama produk, kategori, atau penjual...",
+                            width = "100%"),
+                  div(class = "filter-container",
+                      div(class = "filter-item",
+                          selectInput("filter_lokasi", "Filter Lokasi:", 
+                                      choices = c("Semua Lokasi" = "", "Sleman", "Bantul", "Kota Yogya", "Gunungkidul", "Kulonprogo"),
+                                      selected = "", width = "200px")
+                      ),
+                      div(class = "filter-item",
+                          selectInput("filter_kondisi", "Filter Kondisi:", 
+                                      choices = c("Semua Kondisi" = "", "Baru", "Bekas - Sangat Baik", "Bekas - Baik", "Bekas - Cukup"),
+                                      selected = "", width = "200px")
+                      ),
+                      div(class = "filter-item",
+                          numericInput("filter_harga_min", "Harga Min:", value = NULL, min = 0, width = "150px")
+                      ),
+                      div(class = "filter-item",
+                          numericInput("filter_harga_max", "Harga Max:", value = NULL, min = 0, width = "150px")
+                      ),
+                      div(class = "filter-item",
+                          actionButton("reset_filter", "Reset Filter", class = "btn btn-secondary")
+                      )
+                  )
+              ),
+              # Products Section
+              fluidRow(
+                box(width = 12, title = "Produk yang Tersedia", status = "primary", class = "box-custom",
+                    uiOutput("produk_filtered"))
+              )
+      ),
+      
+      # Jual Barang tab
+      tabItem(tabName = "jual",
+              uiOutput("jual_barang_ui")
+      ),
+      
+      # Produk Saya tab
+      tabItem(tabName = "produk_saya",
+              uiOutput("produk_saya_ui")
+      ),
+      
+      # Profil Pengguna tab
+      tabItem(tabName = "profil",
+              box(width = 4, title = "Informasi Profil", class = "box-custom",
+                  uiOutput("user_profile")),
+              box(width = 8, title = "Riwayat Transaksi", class = "box-custom",
+                  DTOutput("riwayat_transaksi"))
+      ),
+      
+      # Authentication tab
+      tabItem(tabName = "auth",
+              uiOutput("auth_ui")
+      )
+    )
+  )
+)
+
+# Server logic
 server <- function(input, output, session) {
+  # Reactive values for authentication
   user_logged <- reactiveVal(NULL)
   mode <- reactiveVal("login")
-  produk_id_counter <- reactiveVal(1)
-
-  output$main_ui <- renderUI({
+  selected_product <- reactiveVal(NULL)
+  edit_product <- reactiveVal(NULL)
+  
+  # Simulated database
+  db <- reactiveValues(
+    users = data.frame(nama=character(), email=character(), nohp=character(), lokasi=character(), stringsAsFactors=FALSE),
+    produk = data.frame(ID=numeric(), Gambar=character(), Nama=character(), Harga=numeric(), 
+                        Deskripsi=character(), Penjual=character(), Lokasi=character(), 
+                        Kondisi=character(), Status=character(), stringsAsFactors=FALSE),
+    transaksi = data.frame(id_produk=numeric(), pembeli=character(), metode=character(), status=character(), stringsAsFactors=FALSE),
+    chats = data.frame(id_produk=numeric(), pengirim=character(), penerima=character(), pesan=character(), waktu=as.POSIXct(character()), stringsAsFactors=FALSE)
+  )
+  
+  # Initialize with sample products
+  observe({
+    if(nrow(db$produk) == 0) {
+      db$produk <- produk_bekas
+    }
+  })
+  
+  # Reactive function for filtered products
+  filtered_products <- reactive({
+    produk_dijual <- db$produk[db$produk$Status == "Dijual", ]
+    
+    if(nrow(produk_dijual) == 0) return(produk_dijual)
+    
+    # Apply search filter
+    if(!is.null(input$search_query) && input$search_query != "") {
+      search_terms <- tolower(input$search_query)
+      produk_dijual <- produk_dijual[
+        grepl(search_terms, tolower(produk_dijual$Nama)) |
+          grepl(search_terms, tolower(produk_dijual$Deskripsi)) |
+          grepl(search_terms, tolower(produk_dijual$Penjual)), 
+      ]
+    }
+    
+    # Apply location filter
+    if(!is.null(input$filter_lokasi) && input$filter_lokasi != "") {
+      produk_dijual <- produk_dijual[produk_dijual$Lokasi == input$filter_lokasi, ]
+    }
+    
+    # Apply condition filter
+    if(!is.null(input$filter_kondisi) && input$filter_kondisi != "") {
+      produk_dijual <- produk_dijual[produk_dijual$Kondisi == input$filter_kondisi, ]
+    }
+    
+    # Apply price filters
+    if(!is.null(input$filter_harga_min) && !is.na(input$filter_harga_min)) {
+      produk_dijual <- produk_dijual[produk_dijual$Harga >= input$filter_harga_min, ]
+    }
+    
+    if(!is.null(input$filter_harga_max) && !is.na(input$filter_harga_max)) {
+      produk_dijual <- produk_dijual[produk_dijual$Harga <= input$filter_harga_max, ]
+    }
+    
+    return(produk_dijual)
+  })
+  
+  # Reset filter functionality
+  observeEvent(input$reset_filter, {
+    updateTextInput(session, "search_query", value = "")
+    updateSelectInput(session, "filter_lokasi", selected = "")
+    updateSelectInput(session, "filter_kondisi", selected = "")
+    updateNumericInput(session, "filter_harga_min", value = NA)
+    updateNumericInput(session, "filter_harga_max", value = NA)
+  })
+  
+  # Render authentication UI
+  output$auth_ui <- renderUI({
     if (is.null(user_logged())) {
       if (mode() == "login") loginUI() else registerUI()
     } else {
-      berandaUI()
+      fluidPage(
+        div(class = "box-custom",
+            h2(HTML(paste0('<span class="leaf-icon">&#127811;</span>Selamat datang, ', user_logged()))),
+            actionButton("btn_logout", "Logout", class = "btn-custom")
+        )
+      )
     }
   })
-
+  
+  # Render filtered products
+  output$produk_filtered <- renderUI({
+    produk_filtered <- filtered_products()
+    
+    if(nrow(produk_filtered) == 0) {
+      return(div(class = "box-custom", 
+                 h3("Tidak ada produk yang ditemukan"),
+                 p("Coba ubah kata kunci pencarian atau filter yang digunakan.")))
+    }
+    
+    fluidRow(
+      lapply(1:nrow(produk_filtered), function(i) {
+        column(4,
+               div(class = "product-card",
+                   tags$img(src = produk_filtered$Gambar[i], class = "product-img"),
+                   h4(produk_filtered$Nama[i]),
+                   h5(paste("Rp", format(produk_filtered$Harga[i], big.mark = ".", decimal.mark = ","))),
+                   p(produk_filtered$Deskripsi[i]),
+                   p(paste("Penjual:", produk_filtered$Penjual[i])),
+                   p(paste("Lokasi:", produk_filtered$Lokasi[i])),
+                   p(paste("Kondisi:", produk_filtered$Kondisi[i])),
+                   actionButton(paste0("beli_", produk_filtered$ID[i]), "Beli", class = "btn-custom")
+               )
+        )
+      })
+    )
+  })
+  
+  # Render Jual Barang UI
+  output$jual_barang_ui <- renderUI({
+    if (is.null(user_logged())) {
+      div(class = "box-custom",
+          h2("Silakan login untuk menjual barang"),
+          actionButton("to_auth_from_jual", "Login/Register", class = "btn-custom")
+      )
+    } else {
+      jualBarangForm()
+    }
+  })
+  
+  # Jual Barang Form
+  jualBarangForm <- function() {
+    tagList(
+      div(class = "box-custom",
+          h2(HTML(paste0('<span class="leaf-icon">&#127811;</span>Jual Barang Bekas Anda'))),
+          p("Bantu lingkungan dengan menjual barang bekas yang masih layak pakai!")
+      ),
+      div(class = "form-section",
+          h3("Informasi Produk"),
+          fluidRow(
+            column(6,
+                   textInput("nama_produk", "Nama Produk*", placeholder = "Contoh: Laptop Asus ROG"),
+                   numericInput("harga_produk", "Harga (Rp)*", value = 0, min = 0),
+                   selectInput("kondisi_produk", "Kondisi*", 
+                               choices = c("", "Baru", "Bekas - Sangat Baik", "Bekas - Baik", "Bekas - Cukup"),
+                               selected = ""),
+                   selectInput("kategori_produk", "Kategori", 
+                               choices = c("", "Elektronik", "Fashion", "Buku", "Furniture", "Olahraga", "Lainnya"),
+                               selected = "")
+            ),
+            column(6,
+                   fileInput("gambar_produk", "Unggah Gambar Produk*", 
+                             accept = c('image/png', 'image/jpeg', 'image/jpg'),
+                             placeholder = "Pilih file gambar..."),
+                   uiOutput("preview_gambar"),
+                   checkboxInput("barang_masih_garansi", "Barang masih dalam garansi", FALSE),
+                   checkboxInput("include_box", "Termasuk box/kemasan asli", FALSE)
+            )
+          ),
+          textAreaInput("deskripsi_produk", "Deskripsi Produk*", 
+                        placeholder = "Jelaskan kondisi barang, spesifikasi, alasan jual, dll.",
+                        rows = 4),
+          hr(),
+          h4("Validasi Form"),
+          uiOutput("validasi_form"),
+          br(),
+          div(style = "text-align: center;",
+              actionButton("submit_jual", "Posting Produk", class = "btn-custom", 
+                           style = "font-size: 16px; padding: 10px 30px;"),
+              actionButton("reset_form", "Reset Form", class = "btn btn-secondary", 
+                           style = "margin-left: 10px;")
+          )
+      )
+    )
+  }
+  
+  # Preview gambar
+  output$preview_gambar <- renderUI({
+    if (!is.null(input$gambar_produk)) {
+      tags$div(
+        tags$h5("Preview Gambar:"),
+        tags$img(src = input$gambar_produk$datapath, class = "preview-img")
+      )
+    }
+  })
+  # Preview gambar
+  output$preview_gambar <- renderUI({
+    if (!is.null(input$gambar_produk)) {
+      tags$div(
+        tags$h5("Preview Gambar:"),
+        tags$img(src = input$gambar_produk$datapath, class = "preview-img")
+      )
+    }
+  })
+  
+  # Validasi form
+  output$validasi_form <- renderUI({
+    errors <- c()
+    
+    if (is.null(input$nama_produk) || input$nama_produk == "") {
+      errors <- c(errors, "Nama produk harus diisi")
+    }
+    if (is.null(input$harga_produk) || input$harga_produk <= 0) {
+      errors <- c(errors, "Harga harus lebih dari 0")
+    }
+    if (is.null(input$kondisi_produk) || input$kondisi_produk == "") {
+      errors <- c(errors, "Kondisi produk harus dipilih")
+    }
+    if (is.null(input$deskripsi_produk) || input$deskripsi_produk == "") {
+      errors <- c(errors, "Deskripsi produk harus diisi")
+    }
+    if (is.null(input$gambar_produk)) {
+      errors <- c(errors, "Gambar produk harus diunggah")
+    }
+    
+    if (length(errors) > 0) {
+      div(class = "alert-error",
+          h5("Form belum lengkap:"),
+          tags$ul(
+            lapply(errors, function(error) tags$li(error))
+          )
+      )
+    } else {
+      div(class = "alert-success",
+          h5("✓ Form sudah lengkap dan siap diposting!")
+      )
+    }
+  })
+  
+  # Handle product submission
+  observeEvent(input$submit_jual, {
+    # Validasi
+    if (is.null(input$nama_produk) || input$nama_produk == "" ||
+        is.null(input$harga_produk) || input$harga_produk <= 0 ||
+        is.null(input$kondisi_produk) || input$kondisi_produk == "" ||
+        is.null(input$deskripsi_produk) || input$deskripsi_produk == "" ||
+        is.null(input$gambar_produk)) {
+      
+      showModal(modalDialog(
+        title = "Form Tidak Lengkap",
+        "Mohon lengkapi semua field yang wajib diisi (bertanda *)",
+        easyClose = TRUE
+      ))
+      return()
+    }
+    
+    # Handle image upload
+    gambar_base64 <- produk_bekas$Gambar[1]  # Default image
+    if (!is.null(input$gambar_produk)) {
+      tryCatch({
+        gambar_base64 <- base64enc::dataURI(file = input$gambar_produk$datapath, mime = "image/jpeg")
+      }, error = function(e) {
+        gambar_base64 <- input$gambar_produk$datapath
+      })
+    }
+    
+    # Get user location
+    user_data <- db$users[db$users$nama == user_logged(), ]
+    user_lokasi <- if(nrow(user_data) > 0) user_data$lokasi[1] else "Yogyakarta"
+    
+    # Generate new ID
+    new_id <- ifelse(nrow(db$produk) == 0, 1, max(db$produk$ID) + 1)
+    
+    # Create new product
+    new_product <- data.frame(
+      ID = new_id,
+      Gambar = gambar_base64,
+      Nama = input$nama_produk,
+      Harga = input$harga_produk,
+      Deskripsi = input$deskripsi_produk,
+      Penjual = user_logged(),
+      Lokasi = user_lokasi,
+      Kondisi = input$kondisi_produk,
+      Status = "Dijual",
+      stringsAsFactors = FALSE
+    )
+    
+    # Add to database
+    db$produk <- rbind(db$produk, new_product)
+    
+    # Show success message and redirect
+    showModal(modalDialog(
+      title = "Produk Berhasil Diposting!",
+      tagList(
+        p("Selamat! Produk Anda telah berhasil diposting di marketplace."),
+        p("Pembeli dapat melihat dan menghubungi Anda melalui chat."),
+        hr(),
+        p(strong("Detail Produk:")),
+        p(paste("Nama:", input$nama_produk)),
+        p(paste("Harga: Rp", format(input$harga_produk, big.mark = ".", decimal.mark = ",")))
+      ),
+      footer = tagList(
+        actionButton("lihat_produk_saya", "Lihat Produk Saya", class = "btn-custom"),
+        modalButton("Tutup")
+      )
+    ))
+    
+    # Reset form
+    updateTextInput(session, "nama_produk", value = "")
+    updateNumericInput(session, "harga_produk", value = 0)
+    updateSelectInput(session, "kondisi_produk", selected = "")
+    updateSelectInput(session, "kategori_produk", selected = "")
+    updateTextAreaInput(session, "deskripsi_produk", value = "")
+    updateCheckboxInput(session, "barang_masih_garansi", value = FALSE)
+    updateCheckboxInput(session, "include_box", value = FALSE)
+  })
+  
+  # Reset form
+  observeEvent(input$reset_form, {
+    updateTextInput(session, "nama_produk", value = "")
+    updateNumericInput(session, "harga_produk", value = 0)
+    updateSelectInput(session, "kondisi_produk", selected = "")
+    updateSelectInput(session, "kategori_produk", selected = "")
+    updateTextAreaInput(session, "deskripsi_produk", value = "")
+    updateCheckboxInput(session, "barang_masih_garansi", value = FALSE)
+    updateCheckboxInput(session, "include_box", value = FALSE)
+    # Note: fileInput cannot be reset programmatically in Shiny
+  })
+  
+  # Redirect to Produk Saya
+  observeEvent(input$lihat_produk_saya, {
+    removeModal()
+    updateTabItems(session, "sidebar", "produk_saya")
+  })
+  
+  # Render Produk Saya UI
+  output$produk_saya_ui <- renderUI({
+    if (is.null(user_logged())) {
+      div(class = "box-custom",
+          h2("Silakan login untuk melihat produk Anda"),
+          actionButton("to_auth_from_produk", "Login/Register", class = "btn-custom")
+      )
+    } else {
+      produkSayaContent()
+    }
+  })
+  
+  # Produk Saya Content
+  produkSayaContent <- function() {
+    produk_saya <- db$produk[db$produk$Penjual == user_logged(), ]
+    
+    tagList(
+      div(class = "box-custom",
+          h2(HTML(paste0('<span class="leaf-icon">&#127811;</span>Produk Saya'))),
+          p(paste("Total produk:", nrow(produk_saya))),
+          if(nrow(produk_saya) > 0) {
+            actionButton("refresh_produk", "Refresh", class = "btn-custom")
+          }
+      ),
+      if (nrow(produk_saya) == 0) {
+        div(class = "box-custom",
+            h3("Anda belum memiliki produk yang dijual"),
+            p("Mulai jual barang bekas Anda sekarang!"),
+            actionButton("to_jual_from_empty", "Jual Barang", class = "btn-custom")
+        )
+      } else {
+        fluidRow(
+          lapply(1:nrow(produk_saya), function(i) {
+            column(4,
+                   div(class = "product-card",
+                       tags$img(src = produk_saya$Gambar[i], class = "product-img"),
+                       h4(produk_saya$Nama[i]),
+                       h5(paste("Rp", format(produk_saya$Harga[i], big.mark = ".", decimal.mark = ","))),
+                       p(paste("Status:", produk_saya$Status[i])),
+                       p(paste("Kondisi:", produk_saya$Kondisi[i])),
+                       div(style = "text-align: center;",
+                           actionButton(paste0("edit_", produk_saya$ID[i]), "Edit", class = "btn-custom"),
+                           actionButton(paste0("hapus_", produk_saya$ID[i]), "Hapus", class = "btn-danger-custom")
+                       )
+                   )
+            )
+          })
+        )
+      }
+    )
+  }
+  
+  # Handle edit and delete buttons
+  observe({
+    produk_saya <- db$produk[db$produk$Penjual == user_logged(), ]
+    if(nrow(produk_saya) > 0) {
+      lapply(1:nrow(produk_saya), function(i) {
+        # Edit button
+        observeEvent(input[[paste0("edit_", produk_saya$ID[i])]], {
+          edit_product(produk_saya[i, ])
+          showModal(modalDialog(
+            title = "Edit Produk",
+            size = "l",
+            tagList(
+              textInput("edit_nama", "Nama Produk", value = produk_saya$Nama[i]),
+              numericInput("edit_harga", "Harga (Rp)", value = produk_saya$Harga[i]),
+              selectInput("edit_kondisi", "Kondisi", 
+                          choices = c("Baru", "Bekas - Sangat Baik", "Bekas - Baik", "Bekas - Cukup"),
+                          selected = produk_saya$Kondisi[i]),
+              textAreaInput("edit_deskripsi", "Deskripsi", value = produk_saya$Deskripsi[i]),
+              selectInput("edit_status", "Status", 
+                          choices = c("Dijual", "Terjual", "Tidak Aktif"),
+                          selected = produk_saya$Status[i])
+            ),
+            footer = tagList(
+              actionButton("simpan_edit", "Simpan Perubahan", class = "btn-custom"),
+              modalButton("Batal")
+            )
+          ))
+        })
+        
+        # Delete button
+        observeEvent(input[[paste0("hapus_", produk_saya$ID[i])]], {
+          showModal(modalDialog(
+            title = "Konfirmasi Hapus",
+            paste("Apakah Anda yakin ingin menghapus produk:", produk_saya$Nama[i], "?"),
+            footer = tagList(
+              actionButton("konfirmasi_hapus", "Ya, Hapus", class = "btn-danger-custom", 
+                           onclick = paste0("Shiny.setInputValue('hapus_id', ", produk_saya$ID[i], ")")),
+              modalButton("Batal")
+            )
+          ))
+        })
+      })
+    }
+  })
+  
+  # Handle save edit
+  observeEvent(input$simpan_edit, {
+    req(edit_product())
+    
+    # Update product in database
+    product_id <- edit_product()$ID
+    db$produk[db$produk$ID == product_id, "Nama"] <- input$edit_nama
+    db$produk[db$produk$ID == product_id, "Harga"] <- input$edit_harga
+    db$produk[db$produk$ID == product_id, "Kondisi"] <- input$edit_kondisi
+    db$produk[db$produk$ID == product_id, "Deskripsi"] <- input$edit_deskripsi
+    db$produk[db$produk$ID == product_id, "Status"] <- input$edit_status
+    
+    removeModal()
+    showModal(modalDialog(
+      "Produk berhasil diperbarui!",
+      easyClose = TRUE
+    ))
+  })
+  
+  # Handle delete confirmation
+  observeEvent(input$konfirmasi_hapus, {
+    removeModal()
+  })
+  
+  # Handle delete by ID
+  observeEvent(input$hapus_id, {
+    db$produk <- db$produk[db$produk$ID != input$hapus_id, ]
+    showModal(modalDialog(
+      "Produk berhasil dihapus!",
+      easyClose = TRUE
+    ))
+  })
+  
+  # Refresh produk
+  observeEvent(input$refresh_produk, {
+    # Force reactive update
+    session$sendCustomMessage("refresh", "")
+  })
+  
+  # Navigation buttons
+  observeEvent(input$to_jual_from_empty, {
+    updateTabItems(session, "sidebar", "jual")
+  })
+  
+  observeEvent(input$to_auth_from_jual, {
+    updateTabItems(session, "sidebar", "auth")
+  })
+  
+  observeEvent(input$to_auth_from_produk, {
+    updateTabItems(session, "sidebar", "auth")
+  })
+  
+  # Handle buy button clicks
+  observe({
+    all_products <- db$produk[db$produk$Status == "Dijual", ]
+    if(nrow(all_products) > 0) {
+      lapply(1:nrow(all_products), function(i) {
+        observeEvent(input[[paste0("beli_", all_products$ID[i])]], {
+          if (is.null(user_logged())) {
+            showModal(modalDialog(
+              "Anda harus login terlebih dahulu untuk membeli produk",
+              footer = tagList(
+                actionButton("to_login_from_buy", "Login", class = "btn-custom")
+              )
+            ))
+          } else if (all_products$Penjual[i] == user_logged()) {
+            showModal(modalDialog(
+              "Anda tidak dapat membeli produk sendiri",
+              easyClose = TRUE
+            ))
+          } else {
+            selected_product(all_products[i, ])
+            showModal(modalDialog(
+              title = paste("Beli Produk:", all_products$Nama[i]),
+              tagList(
+                div(
+                  tags$img(src = all_products$Gambar[i], width = "100%", style = "max-height: 200px; object-fit: cover; border-radius: 8px;"),
+                  h4(paste("Rp", format(all_products$Harga[i], big.mark = ".", decimal.mark = ","))),
+                  p(all_products$Deskripsi[i]),
+                  p(paste("Penjual:", all_products$Penjual[i])),
+                  p(paste("Lokasi:", all_products$Lokasi[i])),
+                  hr(),
+                  h4("Chat dengan Penjual"),
+                  div(class = "chat-box", id = "chat-container",
+                      uiOutput("chat_messages")
+                  ),
+                  textInput("pesan_chat", "Tulis pesan..."),
+                  actionButton("kirim_pesan", "Kirim", class = "btn-custom"),
+                  hr(),
+                  selectInput("metode_bayar", "Metode Pembayaran", 
+                              choices = c("Transfer Bank", "E-Wallet", "COD (Cash on Delivery)")),
+                  actionButton("konfirmasi_beli", "Konfirmasi Pembelian", class = "btn-custom")
+                )
+              ),
+              size = "l"
+            ))
+          }
+        })
+      })
+    }
+  })
+  
+  # Render chat messages
+  output$chat_messages <- renderUI({
+    req(selected_product())
+    req(user_logged())
+    
+    chat_data <- db$chats[db$chats$id_produk == selected_product()$ID & 
+                            ((db$chats$pengirim == user_logged() & db$chats$penerima == selected_product()$Penjual) |
+                               (db$chats$penerima == user_logged() & db$chats$pengirim == selected_product()$Penjual)), ]
+    
+    if (nrow(chat_data) == 0) {
+      return(p("Mulailah percakapan dengan penjual..."))
+    }
+    
+    lapply(1:nrow(chat_data), function(i) {
+      div(class = ifelse(chat_data$pengirim[i] == user_logged(), 
+                         "chat-message sender-message", 
+                         "chat-message receiver-message"),
+          p(chat_data$pesan[i]),
+          p(format(chat_data$waktu[i], "%H:%M"), style = "font-size: 0.8em; text-align: right;")
+      )
+    })
+  })
+  
+  # Handle sending messages
+  observeEvent(input$kirim_pesan, {
+    req(selected_product())
+    req(user_logged())
+    req(input$pesan_chat != "")
+    
+    new_chat <- data.frame(
+      id_produk = selected_product()$ID,
+      pengirim = user_logged(),
+      penerima = selected_product()$Penjual,
+      pesan = input$pesan_chat,
+      waktu = Sys.time(),
+      stringsAsFactors = FALSE
+    )
+    
+    db$chats <- rbind(db$chats, new_chat)
+    updateTextInput(session, "pesan_chat", value = "")
+  })
+  
+  # Handle product purchase
+  observeEvent(input$konfirmasi_beli, {
+    req(selected_product())
+    req(user_logged())
+    
+    new_transaction <- data.frame(
+      id_produk = selected_product()$ID,
+      pembeli = user_logged(),
+      metode = input$metode_bayar,
+      status = "Menunggu Konfirmasi",
+      stringsAsFactors = FALSE
+    )
+    
+    db$transaksi <- rbind(db$transaksi, new_transaction)
+    
+    # Update product status to sold
+    db$produk[db$produk$ID == selected_product()$ID, "Status"] <- "Menunggu Konfirmasi"
+    
+    removeModal()
+    showModal(modalDialog(
+      title = "Pembelian Berhasil",
+      "Terima kasih telah berbelanja di Thriftrush! Penjual akan menghubungi Anda segera.",
+      easyClose = TRUE
+    ))
+  })
+  
+  # Login UI
   loginUI <- function() {
-    fluidPage(
-      div(class="box",
-          h2("Login"),
-          textInput("login_email", "Email"),
-          actionButton("btn_login", "Masuk", class = "btn-custom"),
-          actionButton("to_register", "Belum punya akun?", class = "btn-custom")
-      )
+    div(class = "box-custom",
+        h2("Login"),
+        textInput("login_email", "Email"),
+        actionButton("btn_login", "Masuk", class = "btn-custom"),
+        actionButton("to_register", "Belum punya akun?", class = "btn-custom")
     )
   }
-
+  
+  # Register UI
   registerUI <- function() {
-    fluidPage(
-      div(class="box",
-          h2("Daftar"),
-          textInput("reg_nama", "Nama"),
-          textInput("reg_email", "Email"),
-          textInput("reg_nohp", "No. Telepon"),
-          selectInput("reg_lokasi", "Lokasi", choices = c("Sleman", "Bantul", "Gunungkidul", "Kota Yogyakarta", "Kulonprogo")),
-          actionButton("btn_register", "Daftar", class = "btn-custom"),
-          actionButton("to_login", "Sudah punya akun?", class = "btn-custom")
-      )
+    div(class = "box-custom",
+        h2("Daftar"),
+        textInput("reg_nama", "Nama Lengkap"),
+        textInput("reg_email", "Email"),
+        textInput("reg_nohp", "Nomor Telepon"),
+        selectInput("reg_lokasi", "Lokasi", choices = c("Sleman", "Bantul", "Kota Yogyakarta", "Gunungkidul", "Kulonprogo")),
+        actionButton("btn_register", "Daftar", class = "btn-custom"),
+        actionButton("to_login", "Sudah punya akun?", class = "btn-custom")
     )
   }
-
-  berandaUI <- function() {
-    fluidPage(
-      div(class="box",
-          h2(HTML(paste0('<span class="leaf-icon">&#127811;</span>Halo, ', user_logged()))),
-          actionButton("btn_jual", "Jual Barang", class = "btn-custom"),
-          actionButton("btn_beli", "Beli Barang", class = "btn-custom"),
-          actionButton("btn_logout", "Logout", class = "btn-custom"),
-          actionButton("btn_penjual_qna", "QnA Pembeli", class = "btn-custom"),
-          uiOutput("konten_beranda")
-      )
-    )
-  }
-
+  
+  # Authentication events
   observeEvent(input$to_register, { mode("register") })
   observeEvent(input$to_login, { mode("login") })
-
+  observeEvent(input$to_login_from_buy, { 
+    removeModal()
+    updateTabItems(session, "sidebar", "auth")
+    mode("login")
+  })
+  
   observeEvent(input$btn_register, {
+    if(input$reg_nama == "" || input$reg_email == "" || input$reg_nohp == "" || input$reg_lokasi == "") {
+      showModal(modalDialog("Semua field harus diisi", easyClose = TRUE))
+      return()
+    }
+    
+    # Check if email already exists
+    if(input$reg_email %in% db$users$email) {
+      showModal(modalDialog("Email sudah terdaftar", easyClose = TRUE))
+      return()
+    }
+    
     db$users <- rbind(db$users, data.frame(
       nama=input$reg_nama,
       email=input$reg_email,
@@ -120,169 +935,79 @@ server <- function(input, output, session) {
       stringsAsFactors=FALSE
     ))
     user_logged(input$reg_nama)
+    updateTabItems(session, "sidebar", "beranda")
+    showModal(modalDialog("Registrasi berhasil! Selamat datang di Thriftrush!", easyClose = TRUE))
   })
-
+  
   observeEvent(input$btn_login, {
+    if(input$login_email == "") {
+      showModal(modalDialog("Email harus diisi", easyClose = TRUE))
+      return()
+    }
+    
     found <- db$users[db$users$email == input$login_email, ]
-    if (nrow(found) > 0) user_logged(found$nama[1])
-    else showModal(modalDialog("Email tidak ditemukan", easyClose = TRUE))
-  })
-
-  observeEvent(input$btn_logout, { user_logged(NULL) })
-
-  observeEvent(input$btn_jual, {
-    output$konten_beranda <- renderUI({ jualUI() })
-  })
-
-  jualUI <- function() {
-    tagList(
-      h3("Form Jual Barang"),
-      textInput("nama_produk", "Nama Produk"),
-      numericInput("harga_produk", "Harga", value=0),
-      selectInput("kualitas_produk", "Kualitas", c("Baru", "Bekas - Baik", "Bekas - Cukup")),
-      actionButton("submit_jual", "Posting", class="btn-custom")
-    )
-  }
-
-  observeEvent(input$submit_jual, {
-    new_id <- produk_id_counter()
-    produk_id_counter(new_id + 1)
-    db$produk <- rbind(db$produk, data.frame(
-      id = new_id,
-      penjual = user_logged(),
-      nama = input$nama_produk,
-      harga = input$harga_produk,
-      kualitas = input$kualitas_produk,
-      status = "Dijual",
-      stringsAsFactors = FALSE
-    ))
-    showModal(modalDialog("Produk berhasil diposting!", easyClose=TRUE))
-  })
-
-  observeEvent(input$btn_beli, {
-    output$konten_beranda <- renderUI({ beliUI() })
-  })
-
-  beliUI <- function() {
-    tagList(
-      textInput("cari_produk", "Cari Barang"),
-      actionButton("search_produk", "Cari", class="btn-custom"),
-      tableOutput("hasil_produk")
-    )
-  }
-
-  observeEvent(input$search_produk, {
-    hasil <- db$produk[grepl(input$cari_produk, db$produk$nama, ignore.case=TRUE) & db$produk$status == "Dijual", ]
-    output$hasil_produk <- renderTable({
-      if (nrow(hasil) == 0) return(data.frame(Pesan = "Tidak ada produk ditemukan"))
-      hasil[, c("id", "nama", "harga", "kualitas", "penjual")]
-    }, rownames = TRUE)
-
-    showModal(modalDialog(
-      title = "Beli Produk",
-      textInput("id_beli", "Masukkan ID produk yang ingin dibeli"),
-      selectInput("metode_bayar", "Metode Pembayaran", c("Transfer Bank", "E-Wallet", "COD")),
-      actionButton("btn_bayar", "Bayar", class="btn-custom"),
-      actionButton("btn_qna", "Lihat QnA", class="btn-custom"),
-      easyClose = TRUE
-    ))
-  })
-
-  observeEvent(input$btn_bayar, {
-    idp <- as.numeric(input$id_beli)
-    if (idp %in% db$produk$id) {
-      db$transaksi <- rbind(db$transaksi, data.frame(
-        id_produk = idp,
-        pembeli = user_logged(),
-        metode = input$metode_bayar,
-        status = "Menunggu Pengiriman",
-        stringsAsFactors = FALSE
-      ))
-      db$produk[db$produk$id == idp, "status"] <- "Terjual"
-      showModal(modalDialog("Transaksi berhasil! Menunggu pengiriman.", easyClose = TRUE))
+    if (nrow(found) > 0) {
+      user_logged(found$nama[1])
+      updateTabItems(session, "sidebar", "beranda")
+      showModal(modalDialog(paste("Selamat datang kembali,", found$nama[1], "!"), easyClose = TRUE))
     } else {
-      showModal(modalDialog("ID produk tidak ditemukan.", easyClose = TRUE))
+      showModal(modalDialog("Email tidak ditemukan", easyClose = TRUE))
     }
   })
-
-  observeEvent(input$btn_qna, {
-    showModal(modalDialog(
-      title = "QnA Produk",
-      uiOutput("qna_ui"),
-      easyClose = TRUE
-    ))
+  
+  observeEvent(input$btn_logout, { 
+    user_logged(NULL)
+    updateTabItems(session, "sidebar", "auth")
+    showModal(modalDialog("Anda telah logout. Terima kasih telah menggunakan Thriftrush!", easyClose = TRUE))
   })
-
-  output$qna_ui <- renderUI({
-    produk_id <- as.numeric(input$id_beli)
-    qna_produk <- db$qna[db$qna$id_produk == produk_id, ]
-    tagList(
-      lapply(1:nrow(qna_produk), function(i) {
-        div(
-          h4(paste("Pertanyaan:", qna_produk$pertanyaan[i])),
-          h5(paste("Jawaban:", qna_produk$jawaban[i]))
+  
+  # User profile section
+  output$user_profile <- renderUI({
+    if (is.null(user_logged())) {
+      tags$div("Silakan login untuk melihat profil")
+    } else {
+      user <- db$users[db$users$nama == user_logged(), ]
+      if (nrow(user) == 0) {
+        tags$div("Data pengguna tidak ditemukan")
+      } else {
+        tagList(
+          tags$div(
+            tags$img(src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png", 
+                     height = "100px", width = "100px", style = "display: block; margin: 0 auto;"),
+            tags$h3(user$nama, style = "text-align: center;"),
+            tags$hr(),
+            tags$p(tags$strong("Email: "), user$email),
+            tags$p(tags$strong("No. Telepon: "), user$nohp),
+            tags$p(tags$strong("Lokasi: "), user$lokasi),
+            tags$hr(),
+            tags$p(tags$strong("Statistik:")),
+            tags$p("Produk dijual: ", nrow(db$produk[db$produk$Penjual == user_logged(), ])),
+            tags$p("Transaksi: ", nrow(db$transaksi[db$transaksi$pembeli == user_logged(), ]))
+          )
         )
-      }),
-      textInput("pertanyaan_baru", "Tanyakan sesuatu:"),
-      actionButton("submit_pertanyaan", "Kirim Pertanyaan", class="btn-custom")
-    )
-  })
-
-  observeEvent(input$submit_pertanyaan, {
-    produk_id <- as.numeric(input$id_beli)
-    db$qna <- rbind(db$qna, data.frame(
-      id_produk = produk_id,
-      penanya = user_logged(),
-      pertanyaan = input$pertanyaan_baru,
-      jawaban = "",
-      stringsAsFactors = FALSE
-    ))
-    showModal(modalDialog("Pertanyaan berhasil dikirim!", easyClose=TRUE))
-  })
-
-  observeEvent(input$btn_penjual_qna, {
-    output$konten_beranda <- renderUI({
-      tagList(
-        h3("Pertanyaan dari Pembeli"),
-        uiOutput("daftar_pertanyaan")
-      )
-    })
-  })
-
-  output$daftar_pertanyaan <- renderUI({
-    produk_penjual <- db$produk[db$produk$penjual == user_logged(), ]
-    qna_penjual <- db$qna[db$qna$id_produk %in% produk_penjual$id, ]
-    if (nrow(qna_penjual) == 0) {
-      return(h4("Belum ada pertanyaan."))
+      }
     }
-
-    lapply(1:nrow(qna_penjual), function(i) {
-      idq <- i
-      fluidRow(
-        column(12,
-               h4(paste("Dari:", qna_penjual$penanya[i])),
-               h5(paste("Pertanyaan:", qna_penjual$pertanyaan[i])),
-               textInput(paste0("jawaban_", idq), "Jawab:", value = qna_penjual$jawaban[i]),
-               actionButton(paste0("submit_jawaban_", idq), "Kirim Jawaban", class = "btn-custom"),
-               tags$hr()
-        )
-      )
-    })
   })
-
-  observe({
-    produk_penjual <- db$produk[db$produk$penjual == user_logged(), ]
-    qna_penjual <- db$qna[db$qna$id_produk %in% produk_penjual$id, ]
-    for (i in 1:nrow(qna_penjual)) {
-      local({
-        idx <- i
-        observeEvent(input[[paste0("submit_jawaban_", idx)]], {
-          db$qna[which(db$qna$id_produk == qna_penjual$id_produk[idx] & db$qna$pertanyaan == qna_penjual$pertanyaan[idx]), "jawaban"] <- input[[paste0("jawaban_", idx)]]
-          showModal(modalDialog("Jawaban berhasil dikirim!", easyClose = TRUE))
-        })
-      })
+  
+  # Transaction history
+  output$riwayat_transaksi <- renderDT({
+    if (is.null(user_logged())) {
+      return(data.frame(Keterangan = "Silakan login untuk melihat riwayat transaksi"))
     }
+    
+    transaksi_user <- db$transaksi[db$transaksi$pembeli == user_logged(), ]
+    if (nrow(transaksi_user) == 0) {
+      return(data.frame(Keterangan = "Belum ada riwayat transaksi"))
+    }
+    
+    # Join with product data
+    transaksi_detail <- merge(transaksi_user, db$produk, by.x = "id_produk", by.y = "ID", all.x = TRUE)
+    result <- transaksi_detail[, c("Nama", "Harga", "Penjual", "metode", "status")]
+    names(result) <- c("Produk", "Harga", "Penjual", "Metode Bayar", "Status")
+    
+    datatable(result, options = list(pageLength = 5), rownames = FALSE)
   })
 }
 
+# Run the application
 shinyApp(ui = ui, server = server)
