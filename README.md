@@ -10,40 +10,36 @@ Thriftrush menawarkan platform jual-beli barang bekas dan makanan sisa dalam mas
 ## Mendaftar dan Login
 
 1. Buka aplikasi atau halaman utama.
-2. Isi identitas pada formulir pendaftaran (jika belum memiliki akun).
-3. Lakukan login menggunakan akun yang telah didaftarkan.
+2. Pilih opsi Login jika sudah memiliki akun dan masukkan email. Jika belum memiliki akun, pilih tombol registrasi untuk membuat akun dan masukkan nama lengkap, email, nomor telepon, serta lokasi tempat tinggal ke formulir registrasi.
+
 
 ##  Akses Halaman Utama
 
-- Setelah login berhasil, pengguna akan diarahkan ke halaman utama aplikasi.
-- Input lokasi pengguna untuk menyesuaikan data produk dan layanan yang ditampilkan.
+Setelah berhasil masuk ke akun pribadi, pengguna akan diarahkan ke beranda utama aplikasi yang berisi produk tersedia dan search bar. 
 
 ##  Memilih Aksi: Jual atau Beli
 
-Pengguna dapat memilih untuk menjual atau membeli barang/makanan.
+Pengguna dapat memilih untuk menjual produk melalui sidebar beranda atau membeli produk melalui beranda.
 
 ---
 
 ## Jika Memilih **Jual**:
 
-1. Masukkan data barang/makanan yang ingin dijual.
-2. Klik **"Post"** untuk mengunggah produk ke platform.
-3. Akses **menu QnA** untuk melihat atau menanggapi pertanyaan calon pembeli.
-4. Jawab pertanyaan yang masuk dari pembeli (jika ada).
-5. Lanjut ke **proses transaksi** jika ada pembelian.
-6. Setelah transaksi berhasil, lakukan **pengiriman barang** ke pembeli.
+1. Pilih formulir **Jual Produk** melalui sidebar.
+2. Isi formulir dengan informasi barang atau makanan yang akan dijual.
+3. Unggah formulir ke dalam sistem.
+4. Terima dan jawab pertanyaan dari calon pembeli melalui fitur **Chat.**
+5. **Konfirmasi proses transaksi** apabila pembeli mengajukan pembayaran.
+6. Kirim barang atau makanan kepada pembeli.
 
 ---
 
 ### Jika Memilih **Beli**:
 
-1. Cari barang/makanan yang diinginkan melalui fitur pencarian.
-2. Akses **menu QnA** untuk bertanya kepada penjual jika diperlukan.
-3. Klik **"Ajukan Pertanyaan"** untuk mengirim pertanyaan kepada penjual.
-4. Setelah mendapat informasi yang cukup, lanjutkan ke **proses transaksi**.
-5. Lakukan **pembayaran** sesuai instruksi sistem.
-6. Tunggu hingga penjual melakukan **pengiriman**.
-7. Setelah barang diterima, lakukan **konfirmasi pesanan**.
+1. **Cari** dan **filter** barang atau makanan yang tersedia.
+2. Pilih barang atau makanan yang diinginkan.
+3. Akses fitur **Chat** untuk mengajukan pertanyaan kepada penjual.
+4. Apabila menginginkan transaksi, pilih metode pembayaran dan tunggu konfirmasi dari penjual.
 
 ---
 
